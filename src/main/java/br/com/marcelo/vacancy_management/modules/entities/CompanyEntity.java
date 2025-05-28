@@ -1,9 +1,6 @@
 package br.com.marcelo.vacancy_management.modules.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -23,15 +20,18 @@ public class CompanyEntity {
     private UUID id;
     private String name;
 
+    @Column(nullable = false, unique = true)
     @NotBlank
     @Pattern(regexp = "\\S+", message = "O campo não deve conter espaço")
     private String username;
 
+    @Column(nullable = false, unique = true)
     @NotBlank
     @Email
     private String email;
 
-    @Length(min = 8, max = 30)
+    @Column(nullable = false)
+    @NotBlank
     private String password;
     private String website;
     private String description;

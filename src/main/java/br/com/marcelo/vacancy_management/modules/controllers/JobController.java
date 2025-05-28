@@ -16,7 +16,7 @@ public class JobController {
     @Autowired
     private CreateJobService createJobService;
 
-    @PostMapping
+    @PostMapping(value = "/")
     public JobEntity create(@Valid @RequestBody JobEntity job){
         return createJobService.execute(job);
     }
