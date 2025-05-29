@@ -1,6 +1,6 @@
 package br.com.marcelo.vacancy_management.security;
 
-import br.com.marcelo.vacancy_management.providers.JWTProvider;
+import br.com.marcelo.vacancy_management.providers.JWTCandidateProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,22 +15,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class SecurityFilter extends OncePerRequestFilter {
+public class SecurityCandidate extends OncePerRequestFilter {
 
     @Autowired
-    private JWTProvider jwtProvider;
+    private JWTCandidateProvider jwtCandidateProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        //SecurityContextHolder.getContext().setAuthentication(null);
+//        SecurityContextHolder.getContext().setAuthentication(null);
 
         String header = request.getHeader("Authorization");
 
-        if (request.getRequestURI().startsWith("/company")) {
+        if (request.getRequestURI().startsWith("/candidate")) {
             if (header != null) {
-                var token = this.jwtProvider.validateToken(header);
+                var token = jwtCandidateProvider.validateToken(header);
 
                 if (token == null) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -41,16 +41,15 @@ public class SecurityFilter extends OncePerRequestFilter {
                 var grants = roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
 
-                request.setAttribute("company_id", token.getSubject());
+                request.setAttribute("candidate_id", token.getSubject());
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(token.getSubject(), null,
-                                grants);
+                        grants);
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             }
         }
-
 
         filterChain.doFilter(request, response);
     }

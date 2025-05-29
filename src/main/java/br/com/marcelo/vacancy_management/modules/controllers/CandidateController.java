@@ -1,17 +1,16 @@
 package br.com.marcelo.vacancy_management.modules.controllers;
 
 
-import br.com.marcelo.vacancy_management.exceptions.UserFoundException;
 import br.com.marcelo.vacancy_management.modules.entities.CandidateEntity;
-import br.com.marcelo.vacancy_management.modules.repositories.CandidateRepository;
 import br.com.marcelo.vacancy_management.modules.services.CreateCandidateService;
+import br.com.marcelo.vacancy_management.modules.services.ProfileCandidateService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,7 +21,7 @@ public class CandidateController {
     private CreateCandidateService createCandidateService;
 
     @Autowired
-    private CandidateRepository candidateRepository;
+    private ProfileCandidateService profileCandidateService;
 
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CandidateEntity candidate) {
@@ -35,22 +34,19 @@ public class CandidateController {
 
     }
 
-    @GetMapping
-    public List<CandidateEntity> findAll() {
-        return candidateRepository.findAll();
-    }
+    @GetMapping("/")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<Object> get(HttpServletRequest request) {
 
-    @Transactional
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remove(@PathVariable UUID id) {
-        if (candidateRepository.existsById(id)) {
-            candidateRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            throw new UserFoundException();
+        var idCandidate = request.getAttribute("candidate_id");
+        try {
+            var profile = this.profileCandidateService.execute(UUID.fromString(idCandidate.toString()));
+            return ResponseEntity.ok().body(profile);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
+
 }
 
 
